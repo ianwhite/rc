@@ -10,6 +10,10 @@ describe "Rc::Spec" do
       @spec.should_not be_singleton
     end
     
+    it "should not be incomplete" do
+      @spec.should_not be_incomplete
+    end
+    
     it "should have name: 'foo'" do
       @spec.name.should == 'foo'
     end
@@ -32,6 +36,10 @@ describe "Rc::Spec" do
     
     it "should have source: 'foos'" do
       @spec.source.should == 'foos'
+    end
+    
+    it "should == Rc::Spec::Resources.new('foo')" do
+      @spec.should == Rc::Spec::Resources.new('foo')
     end
   end
   
@@ -88,6 +96,10 @@ describe "Rc::Spec" do
       @spec.should be_singleton
     end
     
+    it "should not be incomplete" do
+      @spec.should_not be_incomplete
+    end
+    
     it "should have name: 'foo'" do
       @spec.name.should == 'foo'
     end
@@ -107,6 +119,10 @@ describe "Rc::Spec" do
     it "should have source: 'foo'" do
       @spec.source.should == 'foo'
     end
+    
+    it "should == Rc::Spec::Resource.new('foo')" do
+      @spec.should == Rc::Spec::Resource.new('foo')
+    end
   end
   
   describe ".new('*')" do
@@ -116,6 +132,14 @@ describe "Rc::Spec" do
     
     it "should be a Glob" do
       @spec.should be_kind_of(Rc::Spec::Glob)
+    end
+    
+    it "should be incomplete" do
+      @spec.should be_incomplete
+    end
+    
+    it "should == Rc::Spec::Glob" do
+      @spec.should == Rc::Spec::Glob.new
     end
   end
   
@@ -131,6 +155,14 @@ describe "Rc::Spec" do
     it "should not be singleton" do
       @spec.should_not be_singleton
     end
+    
+    it "should be incomplete" do
+      @spec.should be_incomplete
+    end
+    
+    it "should == Rc::Spec::Polymorphic.new" do
+      @spec.should == Rc::Spec::Polymorphic.new
+    end
   end
   
   describe ".new('?foo')" do
@@ -144,6 +176,10 @@ describe "Rc::Spec" do
     
     it "should have as: 'foo'" do
       @spec.as.should == 'foo'
+    end
+    
+    it "should == Rc::Spec::Polymorphic.new('foo')" do
+      @spec.should == Rc::Spec::Polymorphic.new('foo')
     end
   end
   

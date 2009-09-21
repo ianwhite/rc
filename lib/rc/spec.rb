@@ -4,15 +4,15 @@ module Rc
   class Spec
     class << self
       # convert the arg to a spec, or if it is one, return it
-      def to_spec(spec)
-        if spec.is_a?(Spec)
-          spec
-        elsif spec.is_a?(Hash)
-          new(spec[:name], spec.except(:name))
-        elsif spec.is_a?(String) || spec.is_a?(Symbol)
-          new(spec)
+      def to_spec(arg)
+        if arg.is_a?(self)
+          arg
+        elsif arg.is_a?(Hash)
+          new arg[:name], arg.except(:name)
+        elsif arg.is_a?(String) || arg.is_a?(Symbol)
+          new arg
         else
-          raise ArgumentError, "can't figure out how to trun #{spec} into an Rc::Spec"
+          raise ArgumentError, "can't figure out how to trun #{arg} into a #{name}"
         end
       end
 
@@ -24,27 +24,15 @@ module Rc
             Glob.new
           elsif options.delete(:polymorphic) || name[0..0] == '?'
             Polymorphic.new(name.sub(/^\?/,''), options, &block)
-          else
+          elsif options.delete(:singleton)
             Resource.new(name, options, &block)
+          else
+            Resources.new(name, options, &block)
           end
         else
           super
         end
       end
-    end
-    
-    attr_reader :name, :singleton, :find, :as, :source, :class_name, :key, :name_prefix, :segment
-    
-    def initialize(name, options = {}, &block)
-      options.assert_valid_keys :singleton, :find, :as
-      @name = name.to_s
-      @find = block || options[:find]
-      @singleton = options[:singleton] ? true : false
-      @as = options[:as]
-    end
-    
-    def singleton?
-      @singleton
     end
     
     def inspect
@@ -57,7 +45,11 @@ module Rc
       
   protected
     def ivars
-      instance_variables.map{|i| instance_variable_get(i) }
+      instance_variables.map{|i| instance_variable_get(i)}
+    end
+    
+    def incomplete?
+      true
     end
     
     class Glob < Spec
@@ -70,9 +62,17 @@ module Rc
     end
     
     class Polymorphic < Spec
-      def initialize(name, options = {}, &block)
-        options[:as] = name if name.present?
-        super('', options, &block)
+      attr_reader :as, :find
+      
+      def initialize(as = nil, options = {}, &block)
+        options.assert_valid_keys(:singleton, :find)
+        @as = as if as.present?
+        @find = block || options[:find]
+        @singleton = options[:singleton] ? true : false
+      end
+      
+      def singleton?
+        @singleton
       end
       
       def to_s
@@ -81,48 +81,48 @@ module Rc
     end
     
     class Resource < Spec
-      # Example Usage
-      #
-      #  Spec.new <name>, <options hash>, <&block>
-      #
-      # _name_ should always be singular.
-      #
-      # Options:
-      #
-      # * <tt>:singleton:</tt> (default false) set this to true if the resource is a Singleton
-      # * <tt>:find:</tt> (default null) set this to a symbol or Proc to specify how to find the resource.
-      #   Use this if the resource is found in an unconventional way
-      #
-      # Options for unconvential use (otherwise these are all inferred from the _name_)
-      # * <tt>:source:</tt> a plural string or symbol (e.g. :users).  This is used to find the class or association name
-      # * <tt>:class:</tt> a Class.  This is the class of the resource (if it can't be inferred from _name_ or :source)
-      # * <tt>:key:</tt> (e.g. :user_id) used to find the resource id in params
-      # * <tt>:name_prefix:</tt> (e.g. 'user_') (set this to false if you want to specify that there is none)
-      # * <tt>:segment:</tt> (e.g. 'users') the segment name in the route that is matched
-      #
-      # Passing a block is the same as passing :find => Proc
+      attr_reader :name, :find, :as, :source, :class_name, :name_prefix, :segment, :key
+
       def initialize(name, options = {}, &block)
-        super(name, options.slice(:singleton, :find, :as), &block)
-        
-        options = options.except(:singleton, :find, :as)
-        options.assert_valid_keys(:class_name, :source, :key, :find, :name_prefix, :segment)
         raise ArgumentError, "requires a name" unless name.present?
-        
-        singleton? ? initialize_singleton_attrs(options) : initialize_attrs(options)
+        options.assert_valid_keys(:find, :as, :class_name, :source, :find, :name_prefix, :segment, :key)
+        @name = name.to_s
+        @find = block || options[:find]
+        @as = options[:as]
         @name_prefix = options[:name_prefix] || (options[:name_prefix] == false ? '' : "#{name}_")
+        initialize_attrs(options)
       end
     
       def to_s
-        "/#{segment}#{"(as => #{as})" if as}#{"/:#{key}" unless singleton?}"
+        "/#{segment}#{"(as => #{as})" if as}"
       end
-        
+      
+      def singleton?
+        true
+      end
+      
+      def incomplete?
+        false
+      end
+      
     private
-      def initialize_singleton_attrs(options)
+      def initialize_attrs(options)
         @segment = (options[:segment] || name).to_s
         @source = (options[:source] || name).to_s
         @class_name = options[:class_name] || source.singularize.classify
       end
+    end
     
+    class Resources < Resource
+      def to_s
+        "#{super}/:#{key}"
+      end
+      
+      def singleton?
+        false
+      end
+      
+    private
       def initialize_attrs(options)
         @segment = (options[:segment] || name.pluralize).to_s
         @source = (options[:source] || name.pluralize).to_s
