@@ -45,5 +45,32 @@ module Rc
     def incomplete?
       find(&:incomplete?) ? true : false
     end
+    
+    # return true if the path matches the spec
+    def match?(path)
+      return false if incomplete?
+      segments = path_to_segments(path)
+      each {|spec| return false unless spec.consume!(segments)}
+      segments.empty?
+    end
+    
+    # expand an incomplete pathspec, given a path, and optional spec map
+    # returns a complete path, or false if expansion doesn't match
+    def expand(path, map = nil)
+      return path unless path.incomplete?
+      path = path[1..-1].split('/')
+      each do |spec|
+        if incomplete?
+          
+        else
+          
+        end
+      end
+    end
+    
+  protected
+    def path_to_segments(path)
+      path[1..-1].split('/')
+    end
   end
 end

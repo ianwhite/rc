@@ -40,4 +40,34 @@ describe "Rc::PathSpec" do
     path.spec_with_segment(:foos).should == path[0]
     path.spec_with_segment(:not_there).should == nil
   end
+  
+  describe "#match?(path)" do
+    it "Incomplete PathSpec should not match" do
+      Rc::PathSpec.new('*').should_not be_match('x')
+    end
+    
+    it "PathSpec(:foo) should match '/foos/2'" do
+      Rc::PathSpec.new(:foo).should be_match('/foos/2')
+    end
+    
+    it "PathSpec(:foo) should not match '/foos'" do
+      Rc::PathSpec.new(:foo).should_not be_match('/foos')
+    end
+    
+    it "PathSpec(:foo) should not match '/foos/2/bar'" do
+      Rc::PathSpec.new(:foo).should_not be_match('/foos/2/bar')
+    end
+    
+    it "PathSpec(:foo, :bar) should match '/foos/2/bars/1'" do
+      Rc::PathSpec.new(:foo, :bar).should be_match('/foos/2/bars/1')
+    end
+    
+    it "PathSpec({:name => :foo, :singleton => true}, :bar) should match '/foo/bars/2'" do
+      Rc::PathSpec.new({:name => :foo, :singleton => true}, :bar).should be_match('/foo/bars/2')
+    end
+    
+    it "PathSpec({:name => :foo, :singleton => true}, :bar) should not match '/foo/bars/2/1'" do
+      Rc::PathSpec.new({:name => :foo, :singleton => true}, :bar).should_not be_match('/foo/bars/2/1')
+    end
+  end
 end

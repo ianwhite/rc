@@ -42,16 +42,16 @@ module Rc
     def ==(other)
       self.class == other.class && self.ivars == other.ivars
     end
-      
-  protected
-    def ivars
-      instance_variables.map{|i| instance_variable_get(i)}
-    end
     
     def incomplete?
       true
     end
     
+  protected
+    def ivars
+      instance_variables.map{|i| instance_variable_get(i)}
+    end
+
     class Glob < Spec
       def initialize(*args)
       end
@@ -105,6 +105,10 @@ module Rc
         false
       end
       
+      def consume!(segments)
+        segment == segments.shift
+      end
+      
     private
       def initialize_attrs(options)
         @segment = (options[:segment] || name).to_s
@@ -120,6 +124,10 @@ module Rc
       
       def singleton?
         false
+      end
+      
+      def consume!(segments)
+        segment == segments.shift && segments.shift
       end
       
     private
