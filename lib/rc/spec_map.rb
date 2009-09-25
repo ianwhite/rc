@@ -14,12 +14,12 @@ module Rc
       
       if old = @map[spec.name]
         @segment_map.delete(old.segment)
-        @key_map.delete(old.key)
+        @key_map.delete(old.key) if old.respond_to?(:key)
       end
       
-      @map[spec.name] = spec
+      @key_map[spec.key] = spec if spec.respond_to?(:key)
       @segment_map[spec.segment] = spec
-      @key_map[spec.key] = spec
+      @map[spec.name] = spec
     end
     
     def concat(specs)

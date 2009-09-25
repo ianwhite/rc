@@ -1,10 +1,6 @@
 module Rc
   class Spec
     class Keyed < Singleton
-      def to_s
-        "#{super}/:#{key}"
-      end
-      
       def singleton?
         false
       end
@@ -19,12 +15,22 @@ module Rc
         end
       end
       
-    private
-      def initialize_attrs(options)
-        @segment = (options[:segment] || name.pluralize).to_s
-        @source = (options[:source] || name.pluralize).to_s
-        @class_name = options[:class_name] || source.classify
-        @key = (options[:key] || source.singularize.foreign_key).to_s
+      def segment
+        @segment ||= name.pluralize
+      end
+      
+      def key
+        @key ||= segment.singularize.foreign_key
+      end
+    
+      def to_s
+        "/#{segment}/:#{key}"
+      end
+    
+    
+    protected
+      def equality_attrs
+        [name, segment, key, as]
       end
     end
   end

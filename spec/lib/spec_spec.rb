@@ -26,18 +26,6 @@ describe "Rc::Spec" do
       @spec.key.should == 'foo_id'
     end
     
-    it "should have name_prefix: 'foo_'" do
-      @spec.name_prefix.should == 'foo_'
-    end
-    
-    it "should have class_name: 'Foo'" do
-      @spec.class_name.should == 'Foo'
-    end
-    
-    it "should have source: 'foos'" do
-      @spec.source.should == 'foos'
-    end
-    
     it "should == Rc::Spec::Keyed.new('foo')" do
       @spec.should == Rc::Spec::Keyed.new('foo')
     end
@@ -46,34 +34,6 @@ describe "Rc::Spec" do
   describe ".new ''" do
     it "should raise ArgumentError" do
       lambda { @spec = Rc::Spec.new('') }.should raise_error(ArgumentError)
-    end
-  end
-
-  describe ".new('foo', :source => :bars)" do
-    before do
-      @spec = Rc::Spec.new 'foo', :source => :bars
-    end
-  
-    it "should have key: 'bar_id'" do
-      @spec.key.should == 'bar_id'
-    end
-    
-    it "should have class_name: 'Bar'" do
-      @spec.class_name.should == 'Bar'
-    end
-    
-    it "should have source: 'bars'" do
-      @spec.source.should == 'bars'
-    end
-  end
-  
-  describe ".new('foo', :name_prefix => false)" do
-    before do
-      @spec = Rc::Spec.new 'foo', :name_prefix => false
-    end
-  
-    it "should have name_prefix: ''" do
-      @spec.name_prefix.should == ''
     end
   end
   
@@ -106,18 +66,6 @@ describe "Rc::Spec" do
     
     it "should have segment: 'foo'" do
       @spec.segment.should == 'foo'
-    end
-    
-    it "should have name_prefix: 'foo_'" do
-      @spec.name_prefix.should == 'foo_'
-    end
-    
-    it "should have class_name: 'Foo'" do
-      @spec.class_name.should == 'Foo'
-    end
-    
-    it "should have source: 'foo'" do
-      @spec.source.should == 'foo'
     end
     
     it "should == Rc::Spec::Singleton.new('foo')" do

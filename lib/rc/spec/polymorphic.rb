@@ -24,7 +24,16 @@ module Rc
       end
       
       def to_s
-        "/?#{"(as => #{as})" if as}#{"/:?_id" unless singleton?}"
+        "/?#{"/:?_id" unless singleton?}"
+      end
+      
+      def inspect
+        "#<#{self.class.name}: #{"as: #{as} " if as}#{to_s}>"
+      end
+    
+    protected
+      def equality_attrs
+        [singleton?, as]
       end
     end
   end

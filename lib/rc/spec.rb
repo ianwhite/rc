@@ -59,7 +59,7 @@ module Rc
     end
     
     def ==(other)
-      self.class == other.class && self.ivars == other.ivars
+      self.class == other.class && self.equality_attrs == other.equality_attrs
     end
     
     def complete?
@@ -80,8 +80,9 @@ module Rc
     end
     
   protected
-    def ivars
-      instance_variables.map{|i| instance_variable_get(i)}
+    # return an ordered array of attribuets meaningful for equality
+    def equality_attrs
+      raise "implement me to enable equality checks"
     end
   end
 end

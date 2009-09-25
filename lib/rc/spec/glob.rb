@@ -46,6 +46,11 @@ module Rc
         
         expanded
       end
+      
+    protected
+      def equality_attrs
+        []
+      end
     end
   end
 end

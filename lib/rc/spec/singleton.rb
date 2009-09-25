@@ -1,21 +1,21 @@
 module Rc
   class Spec
     class Singleton < Spec
-      attr_reader :name, :find, :source, :class_name, :name_prefix, :segment, :key
-      attr_accessor :as
+      attr_accessor :name, :segment, :as
 
       def initialize(name, options = {}, &block)
         raise ArgumentError, "requires a name" unless name.present?
-        options.assert_valid_keys(:find, :as, :class_name, :source, :find, :name_prefix, :segment, :key)
         @name = name.to_s
-        @find = block || options[:find]
-        @as = options[:as] && options[:as].to_s 
-        @name_prefix = options[:name_prefix] || (options[:name_prefix] == false ? '' : "#{name}_")
-        initialize_attrs(options)
+        @as = options[:as].to_s if options[:as]
+        @segment = options[:segment].to_s if options[:segment]
       end
     
       def to_s
-        "/#{segment}#{"(as => #{as})" if as}"
+        "/#{segment}"
+      end
+      
+      def inspect
+        "#<#{self.class.name}: name: #{name}#{", as: #{as}" if as} #{to_s}>"
       end
       
       def singleton?
@@ -32,12 +32,14 @@ module Rc
           raise MismatchError, "#{segments.first} in '#{segments.join('/')}' doesn't match #{self.inspect}"
         end
       end
-        
-    private
-      def initialize_attrs(options)
-        @segment = (options[:segment] || name).to_s
-        @source = (options[:source] || name).to_s
-        @class_name = options[:class_name] || source.singularize.classify
+      
+      def segment
+        @segment ||= name
+      end
+    
+    protected
+      def equality_attrs
+        [name, segment, as]
       end
     end
   end
