@@ -1,3 +1,0 @@
-= rc
-
-Rewrite of resources_controller.
