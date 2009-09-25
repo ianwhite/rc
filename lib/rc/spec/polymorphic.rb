@@ -28,7 +28,7 @@ module Rc
       end
       
       def inspect
-        "#<#{self.class.name}: #{"as: #{as} " if as}#{to_s}>"
+        "#<#{self.class.name}: #{"as:'#{as}', " if as}#{to_s}>"
       end
     
     protected

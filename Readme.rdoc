@@ -1,3 +1,37 @@
 = rc
 
 Rewrite of resources_controller.
+
+== PathSpec
+
+=== Specify a RESTful resource
+
+  # two keyed resources
+  Rc::PathSpec.new(:forum, :post)
+  => #<Rc::PathSpec: /forums/:forum_id/posts/:post_id>
+  
+  # singleton, keyed
+  Rc::PathSpec.new({:name => :account, :singleton => true}, :forum)
+  => #<Rc::PathSpec: /account/forums/:forum_id>
+  
+  # glob
+  Rc::PathSpec.new('*', :post)
+  => #<Rc::PathSpec: /*/posts/:post_id>
+  
+  # polymorphic
+  Rc::PathSpec.new({:name => :owner, :polymorphic => true}, :comment)
+  => #<Rc::PathSpec: /?/:?_id/comments/:comment_id>
+  
+  # singleton polymorphic
+  Rc::PathSpec.new({:name => :owner, :polymorphic => true, :singleton => true}, :comment)
+  #<Rc::PathSpec: /?/comments/:comment_id>
+  
+=== Expand an incomplete (e.g. with glob or polymorphic) path spec
+
+  # glob
+  p = Rc::PathSpec.new('*', :post)
+  p.expand('/foo/bars/3/posts/4')
+  => #<Rc::PathSpec: /foo/bars/:bar_id/posts/:post_id>
+  
+  p.expand('/foo/bars/3')
+  => false
