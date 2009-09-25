@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../../spec_helper'
+require File.dirname(__FILE__) + '/../spec_helper'
 
 describe "Rc::SpecMap" do
   describe "#store" do
@@ -7,13 +7,13 @@ describe "Rc::SpecMap" do
     end
   
     it "should allow storage of complete Spec" do
-      lambda { @map.store Rc::Spec.new('foo') }.should_not raise_error
-      lambda { @map.store Rc::Spec.new('foo', :singleton => true) }.should_not raise_error
+      lambda { @map << Rc::Spec.new('foo') }.should_not raise_error
+      lambda { @map << Rc::Spec.new('foo', :singleton => true) }.should_not raise_error
     end
   
     it "should raise ArgumentError on storage of incomplete Spec" do
-      lambda { @map.store Rc::Spec.new('*') }.should raise_error(ArgumentError)
-      lambda { @map.store Rc::Spec.new('?') }.should raise_error(ArgumentError)
+      lambda { @map << Rc::Spec.new('*') }.should raise_error(ArgumentError)
+      lambda { @map << Rc::Spec.new('?') }.should raise_error(ArgumentError)
     end
   end
   
@@ -38,9 +38,9 @@ describe "Rc::SpecMap" do
       @map[:foo].should == Rc::Spec.new(:foo)
     end
   
-    describe "then .store(:name => 'foo', :segment => 'bars', :key => 'bar_id')" do
+    describe "then << {:name => 'foo', :segment => 'bars', :key => 'bar_id'}" do
       before do
-        @map.store(:name => 'foo', :segment => 'bars', :key => 'bar_id')
+        @map << {:name => 'foo', :segment => 'bars', :key => 'bar_id'}
       end
       
       it "should replace the old spec in all maps" do
@@ -50,7 +50,5 @@ describe "Rc::SpecMap" do
         @map.by_segment.should == {"bars" => spec}
       end
     end
-  end
-  
-  
+  end  
 end

@@ -1,73 +1,104 @@
 module Rc
-  # collection of specs, which can be used to determine a resource_service, etc
-  class PathSpec < Array
+  # Ordered collection of specs, which is used to specify a resource path
+  class PathSpec
+    include Enumerable
+    
+    attr_reader :specs
+    
     def initialize(*args)
-      replace args
+      @specs = []
+      args.each {|a| self << a}
     end
     
-    # element setter methods need to convert the incoming element to a Spec
-    [:<<, :push, :unshift, :[]=].each do |method|
-      eval <<-RUBY
-        def #{method}(arg)
-          super Spec.to_spec(arg)
-        end
-      RUBY
+    def each(&block)
+      @specs.each(&block)
     end
     
-    # collection setter methods need to convert the incoming array to array of Specs
-    [:+, :replace, :concat].each do |method|
-      eval <<-RUBY
-        def #{method}(arg)
-          super arg.map{|e| Spec.to_spec(e)}
-        end
-      RUBY
+    def to_a
+      @specs
     end
     
-    def to_s
-      join
+    def <<(spec)
+      spec = Spec.to_spec(spec)
+      raise ArgumentError, "adding #{spec} will make this path spec indeterminate" unless determinate_with?(spec)
+      specs << spec
+      self
     end
     
-    def inspect
-      "#<#{self.class.name}: #{to_s}>"
+    def concat(specs)
+      specs.to_a.each {|s| self << s}
+      self
     end
     
-    # return the first spec with the given key
-    def spec_with_key(key)
-      find {|s| s.respond_to?(:key) && s.key == key.to_s}
+    def +(specs)
+      dup.concat(specs)
     end
     
-    # return the first spec with the given segment
-    def spec_with_segment(segment)
-      find {|s| s.respond_to?(:segment) && s.segment == segment.to_s}
+    def ==(other)
+      other.is_a?(self.class) && specs == other.specs
     end
     
     # true if any specs are incomplete
     def incomplete?
-      find(&:incomplete?) ? true : false
+      specs.find(&:incomplete?) ? true : false
     end
     
     # return true if the path matches the spec
     def match?(path)
       return false if incomplete?
       segments = path_to_segments(path)
-      each {|spec| return false unless spec.consume!(segments)}
+      specs.each {|spec| spec.match!(segments)}
       segments.empty?
+    rescue Spec::MismatchError
+      false
     end
     
-    # expand an incomplete pathspec, given a path, and optional spec map
-    # returns a complete path, or false if expansion doesn't match
-    def expand(path, map = nil)
-      return path unless path.incomplete?
-      path = path[1..-1].split('/')
-      each do |spec|
-        if incomplete?
-          
+    # Expand an incomplete pathspec, given a path, and optional spec map.
+    # Returns a completed path, or raises Spec::MismatchError
+    def expand!(path, map = nil)
+      return self unless incomplete?
+      segments = path_to_segments(path)
+      expanded = PathSpec.new
+      specs.each_with_index do |spec, idx|
+        if spec.glob?
+          glob_specs = spec.expand(segments, map, specs[idx+1..-1])
+          glob_specs.each {|spec| expanded << spec.match!(segments)}
         else
-          
+          spec = spec.expand(segments, map) if spec.incomplete?
+          expanded << spec.match!(segments)
         end
       end
+      segments.empty? or raise Spec::MismatchError, "left over segments #{segments}"
+      expanded
     end
     
+    # Returns a complete path, or false if there is a mismatch
+    def expand(path, map = nil)
+      expand!(path, map)
+    rescue Spec::MismatchError
+      false
+    end
+    
+    # A pathspec is determinate if it can be expanded given a path.
+    # This means that only one glob may exist between complete specs.
+    def determinate_with?(new_spec)
+      if new_spec.is_a?(Spec::Glob)
+        @specs.reverse.each do |spec|
+          return false if spec.is_a?(Spec::Glob)
+          return true if !spec.incomplete?
+        end
+      end
+      true
+    end
+    
+    def to_s
+      @specs.join
+    end
+    
+    def inspect
+      "#<#{self.class.name}: #{to_s}>"
+    end
+
   protected
     def path_to_segments(path)
       path[1..-1].split('/')

@@ -1,18 +1,16 @@
 module Rc
-  # This class holds all the info that is required to identify a resource, or determine a name prefix, based on a route segment
-  # or segment pair (e.g. /blog or /users/3).
+  # This class holds the info that is required to identify a resource based on path segments
   class Spec
+    class MismatchError < RuntimeError; end
+    
     class << self
       # convert the arg to a spec, or if it is one, return it
       def to_spec(arg)
-        if arg.is_a?(self)
-          arg
-        elsif arg.is_a?(Hash)
-          new arg[:name], arg.except(:name)
-        elsif arg.is_a?(String) || arg.is_a?(Symbol)
-          new arg
-        else
-          raise ArgumentError, "can't figure out how to trun #{arg} into a #{name}"
+        case arg
+        when Spec then arg
+        when Hash then new(arg[:name], arg.except(:name))
+        when String, Symbol then new(arg)
+        else raise ArgumentError, "can't figure out how to trun #{arg} into a #{name}"
         end
       end
 
@@ -25,13 +23,34 @@ module Rc
           elsif options.delete(:polymorphic) || name[0..0] == '?'
             Polymorphic.new(name.sub(/^\?/,''), options, &block)
           elsif options.delete(:singleton)
-            Resource.new(name, options, &block)
+            Singleton.new(name, options, &block)
           else
-            Resources.new(name, options, &block)
+            Keyed.new(name, options, &block)
           end
         else
           super
         end
+      end
+      
+      # creates a single spec from the head of a segments array, and consumes the segment(s).
+      # If singleton is not set, autodetect based on next segment
+      # If a map is passed, then use any specs that match
+      def from_segments!(segments, singleton = nil, map = nil)
+        segment = segments.shift
+        
+        # use mapped spec if it can be found
+        spec = map ? map.for_segment(segment, singleton) : nil
+        
+        # otherwise create a spec using the segment
+        unless spec
+          singleton.nil? && singleton = (segments[0] !~ /^\d/)
+          segment = segment.singularize unless singleton
+          spec = new segment, :singleton => singleton
+        end
+        
+        segments.shift unless spec.singleton? # swallow key segment
+        
+        spec
       end
     end
     
@@ -43,100 +62,26 @@ module Rc
       self.class == other.class && self.ivars == other.ivars
     end
     
-    def incomplete?
+    def complete?
       true
+    end
+    
+    def incomplete?
+      !complete?
+    end
+    
+    def glob?
+      false
+    end
+    
+    # consumes matching segments and returns self, raises MismatchError on a false result
+    def match!(segments)
+      raise "match!(segments) must be implemented in sublcass"
     end
     
   protected
     def ivars
       instance_variables.map{|i| instance_variable_get(i)}
-    end
-
-    class Glob < Spec
-      def initialize(*args)
-      end
-      
-      def to_s
-        "/*"
-      end
-    end
-    
-    class Polymorphic < Spec
-      attr_reader :as, :find
-      
-      def initialize(as = nil, options = {}, &block)
-        options.assert_valid_keys(:singleton, :find)
-        @as = as if as.present?
-        @find = block || options[:find]
-        @singleton = options[:singleton] ? true : false
-      end
-      
-      def singleton?
-        @singleton
-      end
-      
-      def to_s
-        "/?#{"(as => #{as})" if as}#{"/:?_id" unless singleton?}"
-      end
-    end
-    
-    class Resource < Spec
-      attr_reader :name, :find, :as, :source, :class_name, :name_prefix, :segment, :key
-
-      def initialize(name, options = {}, &block)
-        raise ArgumentError, "requires a name" unless name.present?
-        options.assert_valid_keys(:find, :as, :class_name, :source, :find, :name_prefix, :segment, :key)
-        @name = name.to_s
-        @find = block || options[:find]
-        @as = options[:as]
-        @name_prefix = options[:name_prefix] || (options[:name_prefix] == false ? '' : "#{name}_")
-        initialize_attrs(options)
-      end
-    
-      def to_s
-        "/#{segment}#{"(as => #{as})" if as}"
-      end
-      
-      def singleton?
-        true
-      end
-      
-      def incomplete?
-        false
-      end
-      
-      def consume!(segments)
-        segment == segments.shift
-      end
-      
-    private
-      def initialize_attrs(options)
-        @segment = (options[:segment] || name).to_s
-        @source = (options[:source] || name).to_s
-        @class_name = options[:class_name] || source.singularize.classify
-      end
-    end
-    
-    class Resources < Resource
-      def to_s
-        "#{super}/:#{key}"
-      end
-      
-      def singleton?
-        false
-      end
-      
-      def consume!(segments)
-        segment == segments.shift && segments.shift
-      end
-      
-    private
-      def initialize_attrs(options)
-        @segment = (options[:segment] || name.pluralize).to_s
-        @source = (options[:source] || name.pluralize).to_s
-        @class_name = options[:class_name] || source.classify
-        @key = (options[:key] || source.singularize.foreign_key).to_s
-      end
     end
   end
 end

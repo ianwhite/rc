@@ -1,3 +1,7 @@
 require 'rc/spec'
+require 'rc/spec/singleton'
+require 'rc/spec/keyed'
+require 'rc/spec/glob'
+require 'rc/spec/polymorphic'
 require 'rc/path_spec'
 require 'rc/spec_map'

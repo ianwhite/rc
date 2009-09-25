@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../../spec_helper'
+require File.dirname(__FILE__) + '/../spec_helper'
 
 describe "Rc::Spec" do
   describe ".new('foo')" do
@@ -38,8 +38,8 @@ describe "Rc::Spec" do
       @spec.source.should == 'foos'
     end
     
-    it "should == Rc::Spec::Resources.new('foo')" do
-      @spec.should == Rc::Spec::Resources.new('foo')
+    it "should == Rc::Spec::Keyed.new('foo')" do
+      @spec.should == Rc::Spec::Keyed.new('foo')
     end
   end
   
@@ -120,8 +120,8 @@ describe "Rc::Spec" do
       @spec.source.should == 'foo'
     end
     
-    it "should == Rc::Spec::Resource.new('foo')" do
-      @spec.should == Rc::Spec::Resource.new('foo')
+    it "should == Rc::Spec::Singleton.new('foo')" do
+      @spec.should == Rc::Spec::Singleton.new('foo')
     end
   end
   
@@ -130,8 +130,8 @@ describe "Rc::Spec" do
       @spec = Rc::Spec.new '*'
     end
     
-    it "should be a Glob" do
-      @spec.should be_kind_of(Rc::Spec::Glob)
+    it "should be a glob" do
+      @spec.should be_glob
     end
     
     it "should be incomplete" do
@@ -148,12 +148,12 @@ describe "Rc::Spec" do
       @spec = Rc::Spec.new '?'
     end
     
-    it "should be a Polymorphic" do
-      @spec.should be_kind_of(Rc::Spec::Polymorphic)
-    end
-    
     it "should not be singleton" do
       @spec.should_not be_singleton
+    end
+    
+    it "should not be glob" do
+      @spec.should_not be_glob
     end
     
     it "should be incomplete" do

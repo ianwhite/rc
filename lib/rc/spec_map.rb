@@ -1,20 +1,48 @@
 module Rc
+  # Bag of specs, which can be quickly accessed by name, segment, or key (specs are unique by name).
   class SpecMap
+    include Enumerable
+    
     def initialize(*args)
       @map, @segment_map, @key_map = (1..3).map { HashWithIndifferentAccess.new }
-      args.each {|a| store(a)}
+      args.each {|a| self << a}
     end
     
-    def store(spec)
+    def <<(spec)
       spec = Spec.to_spec(spec)
-      raise ArgumentError, "spec must not be incomplete (ie '*' or '?')" if spec.incomplete?
+      raise ArgumentError, "spec must not be incomplete" if spec.incomplete?
+      
       if old = @map[spec.name]
         @segment_map.delete(old.segment)
         @key_map.delete(old.key)
       end
+      
       @map[spec.name] = spec
       @segment_map[spec.segment] = spec
       @key_map[spec.key] = spec
+    end
+    
+    def concat(specs)
+      specs.to_a.each {|s| self << s }
+      self
+    end
+    
+    def +(specs)
+      dup.concat(specs)
+    end
+    
+    def to_a
+      @map.values
+    end
+    
+    def each(&block)
+      @map.values.each(&block)
+    end
+    
+    # return spec matching segment.  If singelton supplied, make sure it matches that boolean
+    def for_segment(segment, singleton = nil)
+      spec = by_segment[segment]
+      singleton.nil? ? spec : (spec.singleton? == singleton && spec)
     end
     
     def [](name)
@@ -34,7 +62,7 @@ module Rc
     end
     
     def to_s
-      @map.map {|k,v| "#{k}: '#{v}'"}.join(",")
+      @map.map {|k,v| "#{k}:'#{v}'"}.join(", ")
     end
     
     def inspect
