@@ -1,5 +1,5 @@
 module Rc
-  # Bag of specs, which can be quickly accessed by name, or segment.
+  # Bag of specs, which can be accessed by name or segment.
   class SpecMap
     include Enumerable
     
@@ -38,6 +38,10 @@ module Rc
       SpecMap.from_params(params) + self
     end
     
+    def ==(other)
+      self.class == other.class && to_a == other.to_a
+    end
+    
     def to_a
       @map.values
     end
@@ -62,6 +66,13 @@ module Rc
     
     def inspect
       "#<#{self.class.name}: #{to_s}>"
+    end
+  
+  protected
+    def initialize_copy(other)
+      other.instance_variable_set('@map', @map.dup)
+      other.instance_variable_set('@segment_map', @segment_map.dup)
+      super
     end
   end
 end

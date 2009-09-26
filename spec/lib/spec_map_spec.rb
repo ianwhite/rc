@@ -74,4 +74,26 @@ describe "Rc::SpecMap" do
       Rc::SpecMap.from_params(:foo => 1, :bar_id => 2) == Rc::SpecMap.new(:bar)
     end
   end
+  
+  describe "(set like)" do
+    before do
+      @map = Rc::SpecMap.new :foo, :bar
+    end
+    
+    it "== is true when other is a SpecMap with == specs" do
+      map = Rc::SpecMap.new :bar, :foo
+      @map.should == map
+    end
+  
+    it "#concat(array-like) conacts the array, calling Spec.to_spec on each element" do
+      @map.concat([:faz, :fang])
+      @map.should == Rc::SpecMap.new(:foo, :bar, :faz, :fang)
+    end
+    
+    it "+ other returns new SpecMap" do
+      addition = @map + [:faz]
+      addition.should == Rc::SpecMap.new(:foo, :bar, :faz)
+      @map.should == Rc::SpecMap.new(:foo, :bar)
+    end
+  end
 end
