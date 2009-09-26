@@ -11,7 +11,7 @@ module Rc
         when Spec then arg
         when Hash then new(arg[:name], arg.except(:name))
         when String, Symbol then new(arg)
-        else raise ArgumentError, "can't figure out how to trun #{arg} into a #{name}"
+        else raise ArgumentError, "can't figure out how to turn #{arg.inspect} into a #{name}"
         end
       end
 
@@ -23,8 +23,8 @@ module Rc
             Glob.new
           elsif options.delete(:polymorphic) || name[0..0] == '?'
             Polymorphic.new(name.sub(/^\?/,''), options, &block)
-          elsif options.delete(:singleton)
-            Singleton.new(name, options, &block)
+          elsif options.delete(:singleton) || name[0..0] == '!'
+            Singleton.new(name.sub(/^\!/,''), options, &block)
           else
             Keyed.new(name, options, &block)
           end

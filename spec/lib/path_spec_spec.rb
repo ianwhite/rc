@@ -29,6 +29,42 @@ describe "Rc::PathSpec" do
     end
   end
 
+  describe "(array like)" do
+    before do
+      @path = Rc::PathSpec.new :foo, :bar
+    end
+    
+    it "== is true when other is a PathSPec with == specs" do
+      path = Rc::PathSpec.new :foo, :bar
+      @path.should == path
+    end
+    
+    it "[n] returns nth element of specs" do
+      @path[1].should == Rc::Spec.new(:bar)
+    end
+    
+    it "[n..m] returns PathSpec with specified range" do
+      @path[1..-1].should == Rc::PathSpec.new(:bar)
+    end
+  
+    it "#concat(array) conacts the array, calling Spec.to_spec on each element" do
+      @path.concat([:faz, :fang])
+      @path.should == Rc::PathSpec.new(:foo, :bar, :faz, :fang)
+    end
+    
+    it "#conact(PathSpec) concats the PathSpec's specs directly" do
+      other = Rc::PathSpec.new(:faz)
+      @path.send(:specs).should_receive(:concat).with(other.send(:specs))
+      @path.concat(other)
+    end
+    
+    it "+ other returns new PathSpec" do
+      addition = @path + [:foo]
+      addition.should == Rc::PathSpec.new(:foo, :bar, :foo)
+      @path.should == Rc::PathSpec.new(:foo, :bar)
+    end
+  end
+  
   describe "(Ensure determinate pathspec) : PathSpec.new(:foo, '*')" do
     before do
       @path = Rc::PathSpec.new :foo, '*'

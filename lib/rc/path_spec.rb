@@ -3,23 +3,20 @@ module Rc
   class PathSpec
     include Enumerable
     
-    attr_reader :specs
-    
-    delegate :[], :each, :to => :specs
-    
     def initialize(*args)
-      @specs = []
+      self.specs = []
       args.each {|a| self << a}
     end
     
     def each(&block)
-      @specs.each(&block)
+      specs.each(&block)
     end
     
     def to_a
-      @specs.dup
+      specs.dup
     end
     
+    # concat a single spec to the end of the path (calls Spec.to_spec with the argument).
     def <<(spec)
       spec = Spec.to_spec(spec)
       raise ArgumentError, "adding #{spec} will make this path spec indeterminate" unless determinate_with?(spec)
@@ -27,17 +24,30 @@ module Rc
       self
     end
     
+    # conact an array-like of specs, or another path spec to the end of the path.
     def concat(specs)
-      specs.to_a.each {|s| self << s}
+      specs.is_a?(PathSpec) ? self.specs.concat(specs.specs) : specs.to_a.each {|s| self << s}
       self
     end
     
+    # return a new path spec which is the argument concated to this path spec.
     def +(specs)
       dup.concat(specs)
     end
     
+    # true if the argument is a path spec, and both have the same specs in order
     def ==(other)
       other.is_a?(self.class) && specs == other.specs
+    end
+    
+    def each(&block)
+      specs.each(&block)
+    end
+    
+    # accepts an integer or range argument.  If a range a path spec is returned
+    def [](idx)
+      result = specs[idx]
+      result.is_a?(Array) ? PathSpec.new.tap {|p| p.specs = result} : result
     end
     
     # true if any specs are incomplete
@@ -90,7 +100,7 @@ module Rc
     # This means that only one glob may exist between complete specs.
     def determinate_with?(new_spec)
       if new_spec.is_a?(Spec::Glob)
-        @specs.reverse.each do |spec|
+        specs.reverse.each do |spec|
           return false if spec.is_a?(Spec::Glob)
           return true if !spec.incomplete?
         end
@@ -99,7 +109,7 @@ module Rc
     end
     
     def to_s
-      @specs.join
+      specs.join
     end
     
     def inspect
@@ -107,8 +117,15 @@ module Rc
     end
 
   protected
+    attr_accessor :specs
+    
     def path_to_segments(path)
       path[1..-1].split('/')
+    end
+    
+    def initialize_copy(other)
+      other.specs = specs.dup
+      super
     end
   end
 end

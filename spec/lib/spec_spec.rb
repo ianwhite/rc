@@ -73,6 +73,16 @@ describe "Rc::Spec" do
     end
   end
   
+  describe ".new('!foo')" do
+    before do
+      @spec = Rc::Spec.new '!foo'
+    end
+    
+    it "should == Rc::Spec::Singleton.new('foo')" do
+      @spec.should == Rc::Spec::Singleton.new('foo')
+    end
+  end
+  
   describe ".new('*')" do
     before do
       @spec = Rc::Spec.new '*'
