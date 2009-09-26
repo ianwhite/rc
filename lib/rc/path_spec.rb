@@ -50,9 +50,9 @@ module Rc
       result.is_a?(Array) ? PathSpec.new.tap {|p| p.specs = result} : result
     end
     
-    # true if any specs are incomplete
-    def incomplete?
-      specs.find(&:incomplete?) ? true : false
+    # true if all specs are complete
+    def complete?
+      specs.find {|s| !s.complete?} ? false : true
     end
     
     # loads resources using path, params, and map
@@ -68,14 +68,14 @@ module Rc
     # Expand an incomplete pathspec, given a path, and optional spec map.
     # Returns a completed path, or raises Spec::MismatchError
     def expand!(path, map = nil)
-      return self unless incomplete?
+      return self if complete?
       expanded, path = PathSpec.new, path.dup
       specs.each_with_index do |spec, idx|
         if spec.glob?
           glob_specs = spec.expand(path, map, specs[idx+1..-1])
           glob_specs.each {|spec| expanded << spec.match!(path)}
         else
-          spec = spec.expand(path, map) if spec.incomplete?
+          spec = spec.expand(path, map) unless spec.complete?
           expanded << spec.match!(path)
         end
       end
@@ -93,10 +93,10 @@ module Rc
     # A pathspec is determinate if it can be expanded given a path.
     # This means that only one glob may exist between complete specs.
     def determinate_with?(new_spec)
-      if new_spec.is_a?(Spec::Glob)
+      if new_spec.glob?
         specs.reverse.each do |spec|
-          return false if spec.is_a?(Spec::Glob)
-          return true if !spec.incomplete?
+          return false if spec.glob?
+          return true if spec.complete?
         end
       end
       true

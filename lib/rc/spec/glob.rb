@@ -8,8 +8,8 @@ module Rc
         true
       end
       
-      def incomplete?
-        true
+      def complete?
+        false
       end
       
       def to_s
@@ -40,7 +40,7 @@ module Rc
       def unmatched_path(path, specs)
         segments = path[1..-1].split('/')
         
-        if complete_spec = specs.find {|s| !s.incomplete?}
+        if complete_spec = specs.find(&:complete?)
           complete_idx = specs.index(complete_spec)
           
           unless unmatched_length = segments.index(complete_spec.segment)

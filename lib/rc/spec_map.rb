@@ -19,7 +19,7 @@ module Rc
     
     def <<(spec)
       spec = Spec.to_spec(spec)
-      raise ArgumentError, "spec must not be incomplete" if spec.incomplete?
+      raise ArgumentError, "spec must be complete" unless spec.complete?
       map[spec.segment] = spec
       self
     end

@@ -10,8 +10,8 @@ describe "Rc::Spec" do
       @spec.should_not be_singleton
     end
     
-    it "should not be incomplete" do
-      @spec.should_not be_incomplete
+    it "should be complete" do
+      @spec.should be_complete
     end
     
     it "should have name: 'foo'" do
@@ -56,8 +56,8 @@ describe "Rc::Spec" do
       @spec.should be_singleton
     end
     
-    it "should not be incomplete" do
-      @spec.should_not be_incomplete
+    it "should be complete" do
+      @spec.should be_complete
     end
     
     it "should have name: 'foo'" do
@@ -92,8 +92,8 @@ describe "Rc::Spec" do
       @spec.should be_glob
     end
     
-    it "should be incomplete" do
-      @spec.should be_incomplete
+    it "should not be complete" do
+      @spec.should_not be_complete
     end
     
     it "should == Rc::Spec::Glob" do
@@ -114,8 +114,8 @@ describe "Rc::Spec" do
       @spec.should_not be_glob
     end
     
-    it "should be incomplete" do
-      @spec.should be_incomplete
+    it "should not be complete" do
+      @spec.should_not be_complete
     end
     
     it "should == Rc::Spec::Polymorphic.new" do

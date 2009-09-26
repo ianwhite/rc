@@ -69,8 +69,8 @@ module Rc
       other.is_a?(self.class) && equality_attrs == other.equality_attrs
     end
     
-    def incomplete?
-      false
+    def complete?
+      true
     end
     
     def glob?
@@ -91,7 +91,7 @@ module Rc
   protected
     # return an ordered array of attribuets meaningful for equality
     def equality_attrs
-      [incomplete?]
+      [complete?]
     end
   end
 end

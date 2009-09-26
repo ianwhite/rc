@@ -13,8 +13,8 @@ module Rc
         @singleton
       end
       
-      def incomplete?
-        true
+      def complete?
+        false
       end
       
       def expand(path, map = nil)

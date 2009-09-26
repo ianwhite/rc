@@ -14,8 +14,8 @@ describe "Rc::PathSpec" do
       @path = Rc::PathSpec.new :foo, '*', :bar
     end
     
-    it "should be incomplete" do
-      @path.should be_incomplete
+    it "should not be complete" do
+      @path.should_not be_complete
     end
   end
   
@@ -24,8 +24,8 @@ describe "Rc::PathSpec" do
       @path = Rc::PathSpec.new :foo, :bar
     end
     
-    it "should not be incomplete" do
-      @path.should_not be_incomplete
+    it "should be complete" do
+      @path.should be_complete
     end
   end
 
