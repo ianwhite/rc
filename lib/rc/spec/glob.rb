@@ -31,8 +31,8 @@ module Rc
       end
       
     protected
-      def equality_attrs
-        super + [glob?]
+      def equality_attr_names
+        super + [:glob?]
       end
       
     private

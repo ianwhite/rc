@@ -22,8 +22,8 @@ module Rc
       end
     
     protected
-      def equality_attrs
-        super + [key]
+      def equality_attr_names
+        super + [:key]
       end
     end
   end

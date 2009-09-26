@@ -66,7 +66,9 @@ module Rc
     end
     
     def ==(other)
-      other.is_a?(self.class) && equality_attrs == other.equality_attrs
+      equality_attrs == other.equality_attrs
+    rescue NoMethodError
+      false
     end
     
     def complete?
@@ -89,9 +91,13 @@ module Rc
     end
     
   protected
-    # return an ordered array of attribuets meaningful for equality
+    # return an ordered array of attr names, the values of which are meaningful for equality
+    def equality_attr_names
+      [:complete?]
+    end
+      
     def equality_attrs
-      [complete?]
+      equality_attr_names.map {|a| send a}
     end
   end
 end

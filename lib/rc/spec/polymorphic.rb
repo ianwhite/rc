@@ -34,8 +34,8 @@ module Rc
       end
     
     protected
-      def equality_attrs
-        super + [singleton?, as]
+      def equality_attr_names
+        super + [:singleton?, :as]
       end
     end
   end
