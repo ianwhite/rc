@@ -11,7 +11,7 @@ module Rc
     end
     
     def initialize(*args)
-      @map, @segment_map = HashWithIndifferentAccess.new, HashWithIndifferentAccess.new
+      @map, @segment_map = {}, {}
       args.each {|a| self << a}
     end
     
@@ -42,12 +42,12 @@ module Rc
     
     # return spec matching segment.  If singelton supplied, make sure it matches that boolean
     def for_segment(segment, singleton = nil)
-      spec = @segment_map[segment]
+      spec = @segment_map[segment.to_s]
       singleton.nil? ? spec : (spec.singleton? == singleton && spec)
     end
     
     def [](name)
-      @map[name]
+      @map[name.to_s]
     end
     
     def to_s
