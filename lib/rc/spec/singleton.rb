@@ -14,6 +14,10 @@ module Rc
         "/#{segment}"
       end
       
+      def regexp
+        "/#{segment}"
+      end
+      
       def inspect
         "#<#{self.class.name}: #{to_s} {name:#{name}#{",as:#{as}" if as}}>"
       end

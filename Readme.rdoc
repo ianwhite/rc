@@ -7,31 +7,27 @@ Rewrite of resources_controller.
 === Specify a RESTful resource
 
   # two keyed resources
-  Rc::PathSpec.new(:forum, :post)
-  => #<Rc::PathSpec: /forums/:forum_id/posts/:post_id>
+  p = Rc.path_spec :forum, :post
+  => #<Rc::PathSpec: [#<Rc::Spec::Keyed: /forums/:forum_id {name:forum}>, #<Rc::Spec::Keyed: /posts/:post_id {name:post}>]>
   
-  # singleton, keyed
-  Rc::PathSpec.new({:name => :account, :singleton => true}, :forum)
-  => #<Rc::PathSpec: /account/forums/:forum_id>
+  p.to_s
+  => "/forums/:forum_id/posts/:post_id"
   
-  # glob
-  Rc::PathSpec.new('*', :post)
-  => #<Rc::PathSpec: /*/posts/:post_id>
-  
-  # polymorphic
-  Rc::PathSpec.new({:name => :owner, :polymorphic => true}, :comment)
-  => #<Rc::PathSpec: /?/:?_id/comments/:comment_id>
-  
-  # singleton polymorphic
-  Rc::PathSpec.new({:name => :owner, :polymorphic => true, :singleton => true}, :comment)
-  #<Rc::PathSpec: /?/comments/:comment_id>
-  
-=== Expand an incomplete (e.g. with glob or polymorphic) path spec
+  p.to_regexp
+  => /^\/forums\/[^\/]+\/posts\/[^\/]+$/
+    
+=== Match, or expand an incomplete (e.g. with glob or polymorphic) path spec
 
-  # glob
-  p = Rc::PathSpec.new('*', :post)
-  p.expand('/foo/bars/3/posts/4')
-  => #<Rc::PathSpec: /foo/bars/:bar_id/posts/:post_id>
+  g = Rc.path_spec '*', :post
+  => #<Rc::PathSpec: [#<Rc::Spec::Glob: /*>, #<Rc::Spec::Keyed: /posts/:post_id {name:post}>]>
   
-  p.expand('/foo/bars/3')
+  p = g.expand '/foo/bars/3/posts/4'
+  p.to_s
+  => "/foo/bars/:bar_id/posts/:post_id"
+  
+  g.expand '/foo/bars/3'
   => false
+
+  g.match? '/foo/1/posts/2'
+  => true
+  

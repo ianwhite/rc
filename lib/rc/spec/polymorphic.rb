@@ -22,6 +22,10 @@ module Rc
       end
       
       def to_s
+        "/?#{"/:?_id" unless singleton?}"
+      end
+      
+      def regexp
         "/[^/]+#{"/[^/]+" unless singleton?}"
       end
       

@@ -14,11 +14,11 @@ module Rc
       end
     
       def to_s
-        "/#{segment}/[^/]+"
+        "/#{segment}/:#{key}"
       end
-      
-      def inspect
-        "#<#{self.class.name}: #{to_s} {name:#{name},key:#{key}#{",as:#{as}" if as}}>"
+
+      def regexp
+        "/#{segment}/[^/]+"
       end
     
     protected

@@ -57,16 +57,12 @@ module Rc
       end
     end
     
-    def to_s
-      raise "implement to_s to return a Regexp string that would match this segment"
-    end
-    
     def inspect
       "#<#{self.class.name}: #{to_s}>"
     end
     
     def to_regexp
-      %r(^#{to_s})
+      %r(^#{regexp})
     end
     
     def ==(other)

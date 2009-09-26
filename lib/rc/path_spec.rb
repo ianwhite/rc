@@ -106,8 +106,12 @@ module Rc
       specs.join
     end
     
+    def regexp
+      specs.map(&:regexp).join
+    end
+    
     def to_regexp
-      %r(^#{to_s}$)
+      %r(^#{regexp}$)
     end
     
     def inspect

@@ -13,6 +13,10 @@ module Rc
       end
       
       def to_s
+        "/*"
+      end
+      
+      def regexp
         "(/[^/]+)*"
       end
       
