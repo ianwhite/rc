@@ -12,8 +12,8 @@ module Rc
       PathSpec.new(*args)
     end
     
-    def spec(arg)
-      Spec.to_spec(arg)
+    def spec(arg, opts = {}, &block)
+      Spec.to_spec(arg, opts, &block)
     end
   end
 end

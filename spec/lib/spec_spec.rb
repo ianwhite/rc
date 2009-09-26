@@ -166,12 +166,12 @@ describe "Rc::Spec" do
     end
     
     it "(:foo) should call new(:foo)" do
-      Rc::Spec.should_receive(:new).with(:foo)
+      Rc::Spec.should_receive(:new).with(:foo, {})
       Rc::Spec.to_spec(:foo)
     end
     
     it "('foo') should call new('foo')" do
-      Rc::Spec.should_receive(:new).with('foo')
+      Rc::Spec.should_receive(:new).with('foo', {})
       Rc::Spec.to_spec('foo')
     end
     

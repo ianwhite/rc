@@ -6,11 +6,11 @@ module Rc
     
     class << self
       # convert the arg to a spec, or if it is one, return it
-      def to_spec(arg)
+      def to_spec(arg, opts = {}, &block)
         case arg
         when Spec then arg
         when Hash then new(arg[:name], arg.except(:name))
-        when String, Symbol then new(arg)
+        when String, Symbol then new(arg, opts, &block)
         else raise ArgumentError, "can't figure out how to turn #{arg.inspect} into a #{name}"
         end
       end
