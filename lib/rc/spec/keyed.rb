@@ -23,7 +23,7 @@ module Rc
     
     protected
       def equality_attrs
-        [name, segment, key, as]
+        super + [key]
       end
     end
   end

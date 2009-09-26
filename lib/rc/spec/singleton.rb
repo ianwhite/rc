@@ -4,7 +4,7 @@ module Rc
       attr_reader :name, :segment, :as
 
       def initialize(name, options = {}, &block)
-        raise ArgumentError, "requires a name" unless name.present?
+        raise ArgumentError, "#{self.class.name}.new requires a name" unless name.present?
         @name = name.to_s
         @as = options[:as].to_s if options[:as]
         @segment = options[:segment].to_s if options[:segment]
@@ -28,7 +28,7 @@ module Rc
     
     protected
       def equality_attrs
-        [name, segment, as]
+        super + [name, segment, as]
       end
     end
   end

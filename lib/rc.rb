@@ -12,7 +12,7 @@ module Rc
       PathSpec.new(*args)
     end
     
-    def to_spec(arg)
+    def spec(arg)
       Spec.to_spec(arg)
     end
   end

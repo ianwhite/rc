@@ -28,7 +28,7 @@ module Rc
       
     protected
       def equality_attrs
-        []
+        super + [glob?]
       end
       
     private

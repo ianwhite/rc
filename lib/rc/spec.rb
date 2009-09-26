@@ -70,7 +70,7 @@ module Rc
     end
     
     def ==(other)
-      self.class == other.class && self.equality_attrs == other.equality_attrs
+      other.is_a?(self.class) && equality_attrs == other.equality_attrs
     end
     
     def incomplete?
@@ -95,7 +95,7 @@ module Rc
   protected
     # return an ordered array of attribuets meaningful for equality
     def equality_attrs
-      raise "implement equality_attrs to enable equality checks for specs"
+      [incomplete?]
     end
   end
 end

@@ -31,7 +31,7 @@ module Rc
     
     protected
       def equality_attrs
-        [singleton?, as]
+        super + [singleton?, as]
       end
     end
   end
