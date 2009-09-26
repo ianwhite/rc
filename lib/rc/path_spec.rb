@@ -5,6 +5,8 @@ module Rc
     
     attr_reader :specs
     
+    delegate :[], :each, :to => :specs
+    
     def initialize(*args)
       @specs = []
       args.each {|a| self << a}
@@ -15,7 +17,7 @@ module Rc
     end
     
     def to_a
-      @specs
+      @specs.dup
     end
     
     def <<(spec)
@@ -41,6 +43,11 @@ module Rc
     # true if any specs are incomplete
     def incomplete?
       specs.find(&:incomplete?) ? true : false
+    end
+    
+    # loads resources using path, params, and map
+    def load(path, params = nil, map = nil)
+      
     end
     
     # return true if the path matches the spec

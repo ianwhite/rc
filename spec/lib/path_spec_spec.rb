@@ -3,10 +3,10 @@ require File.dirname(__FILE__) + '/../spec_helper'
 describe "Rc::PathSpec" do
   it ".new(:foo, {:name => :bar, :singleton => true}, '*', '?owner') should create a path spec with 4 different specs" do
     path = Rc::PathSpec.new(:foo, {:name => :bar, :singleton => true}, '*', '?owner')
-    path.specs[0].should == Rc::Spec::Keyed.new('foo')
-    path.specs[1].should == Rc::Spec::Singleton.new('bar')
-    path.specs[2].should == Rc::Spec::Glob.new
-    path.specs[3].should == Rc::Spec::Polymorphic.new('owner')
+    path[0].should == Rc::Spec::Keyed.new('foo')
+    path[1].should == Rc::Spec::Singleton.new('bar')
+    path[2].should == Rc::Spec::Glob.new
+    path[3].should == Rc::Spec::Polymorphic.new('owner')
   end
   
   describe "containing an incomplete spec" do
@@ -38,6 +38,10 @@ describe "Rc::PathSpec" do
       lambda { @path << '?' }.should_not raise_error
     end
 
+    it "should allow << '?' << :foo << '*' " do
+      lambda { @path << '?' << :foo << '*' }.should_not raise_error
+    end
+    
     it "should not allow << '*'" do
       lambda { @path << '*' }.should raise_error(ArgumentError)
     end

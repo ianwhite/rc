@@ -22,33 +22,42 @@ describe "Rc::SpecMap" do
       @map = Rc::SpecMap.new(:foo)
     end
     
-    it "should store spec by name" do
-      @map.by_name.should == { "foo" => Rc::Spec.new(:foo) }
+    it "should allow access by ['foo']" do
+      @map["foo"].should == Rc::Spec.new(:foo)
     end
     
-    it "should store spec by segment" do
-      @map.by_segment.should == { "foos" => Rc::Spec.new(:foo) }
-    end
-
-    it "should store spec by key" do
-      @map.by_key.should == { "foo_id" => Rc::Spec.new(:foo) }
-    end
-  
-    it "should default access by name" do
+    it "should default access by [:foo]" do
       @map[:foo].should == Rc::Spec.new(:foo)
     end
+    
+    describe "#for_segment" do
+      it "returns spec matching segment when second argument not specified" do
+        @map.for_segment(:foos).should == Rc::Spec.new(:foo)
+      end
+      
+      it "when 2nd arg given, only returns spec if 2nd argument matches singleton?" do
+        @map.for_segment(:foos, true).should_not be_truthy
+        @map.for_segment(:foos, false).should == Rc::Spec.new(:foo)
+      end
+    end
   
-    describe "then << {:name => 'foo', :segment => 'bars', :key => 'bar_id'}" do
+    describe "then << {:name => 'foo', :segment => 'bars'}" do
       before do
-        @map << {:name => 'foo', :segment => 'bars', :key => 'bar_id'}
+        @spec = Rc::Spec.to_spec(:name => 'foo', :segment => 'bars')
+        @map << @spec
       end
       
       it "should replace the old spec in all maps" do
-        spec = Rc::Spec.to_spec(:name => 'foo', :segment => 'bars', :key => 'bar_id')
-        @map.by_name.should == {"foo" => spec}
-        @map.by_key.should == {"bar_id" => spec}
-        @map.by_segment.should == {"bars" => spec}
+        @map[:foo].should == @spec
+        @map.for_segment(:foos).should_not be_truthy
+        @map.for_segment(:bars).should == @spec
       end
     end
-  end  
+  end
+  
+  describe ".from_params" do
+    it "(:foo => 1, :bar_id => 2) should return SpecMap.new(:bar)" do
+      Rc::SpecMap.from_params(:foo => 1, :bar_id => 2) == Rc::SpecMap.new(:bar)
+    end
+  end
 end

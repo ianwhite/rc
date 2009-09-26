@@ -18,38 +18,39 @@ module Rc
       
       # given segments, an optional map, and optional remaining specs, returns an array of complete specs
       def expand(segments, map = nil, remaining_specs = nil)
-        
-        if remaining_specs
-          if next_complete_spec = remaining_specs.find {|s| !s.incomplete?}
-            # find segment to glob to
-            unless glob_to = segments.index(next_complete_spec.segment)
-              raise MismatchError, "Could not find #{next_complete_spec} after #{self} in '#{segments.join('/')}'"
-            end
-            next_complete_spec_idx = remaining_specs.index(next_complete_spec)
-            incomplete_specs = next_complete_spec_idx > 0 ? remaining_specs[0..next_complete_spec_idx-1] : []
-          else
-            glob_to = segments.length
-            incomplete_specs = remaining_specs
-          end
-          
-          # reverse back for any incomple specs
-          incomplete_specs.each {|s| glob_to -= s.singleton? ? 1 : 2 }
-          
-          segments = glob_to > 0 ? segments[0..glob_to-1] : []
-        end
+        segments = unmatching_segments(segments, remaining_specs) if remaining_specs
         
         expanded = []
-        
         while segments.any? do
           expanded << Spec.from_segments!(segments, nil, map)
         end
-        
         expanded
       end
       
     protected
       def equality_attrs
         []
+      end
+      
+    private
+      # given segments and specs, return the segments up to the point where the specs start to match
+      def unmatching_segments(segments, specs)
+        if complete_spec = specs.find {|s| !s.incomplete?}
+          complete_idx = specs.index(complete_spec)
+          
+          unless unmatching_length = segments.index(complete_spec.segment)
+            raise MismatchError, "Could not find #{complete_spec} after #{self} in '#{segments.join('/')}'"
+          end
+          incomplete_specs = complete_idx > 0 ? specs[0..complete_idx-1] : []
+        else
+          unmatching_length = segments.length
+          incomplete_specs = specs
+        end
+        
+        # reverse back for any incomple specs
+        incomplete_specs.each {|s| unmatching_length -= s.singleton? ? 1 : 2 }
+        
+        unmatching_length > 0 ? segments[0..unmatching_length-1] : []
       end
     end
   end

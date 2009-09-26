@@ -1,23 +1,24 @@
 module Rc
-  # Bag of specs, which can be quickly accessed by name, segment, or key (specs are unique by name).
+  # Bag of specs, which can be quickly accessed by name, or segment.
   class SpecMap
     include Enumerable
     
+    # create a spec map containing keyed resources corresponding to param keys
+    def self.from_params(params)
+      map = new
+      params.keys.each {|k| map << k.to_s[0..-4] if k.to_s[-3..-1] == '_id'}
+      map
+    end
+    
     def initialize(*args)
-      @map, @segment_map, @key_map = (1..3).map { HashWithIndifferentAccess.new }
+      @map, @segment_map = HashWithIndifferentAccess.new, HashWithIndifferentAccess.new
       args.each {|a| self << a}
     end
     
     def <<(spec)
       spec = Spec.to_spec(spec)
       raise ArgumentError, "spec must not be incomplete" if spec.incomplete?
-      
-      if old = @map[spec.name]
-        @segment_map.delete(old.segment)
-        @key_map.delete(old.key) if old.respond_to?(:key)
-      end
-      
-      @key_map[spec.key] = spec if spec.respond_to?(:key)
+      @segment_map.delete(@map[spec.name].segment) if @map[spec.name]
       @segment_map[spec.segment] = spec
       @map[spec.name] = spec
     end
@@ -41,24 +42,12 @@ module Rc
     
     # return spec matching segment.  If singelton supplied, make sure it matches that boolean
     def for_segment(segment, singleton = nil)
-      spec = by_segment[segment]
+      spec = @segment_map[segment]
       singleton.nil? ? spec : (spec.singleton? == singleton && spec)
     end
     
     def [](name)
       @map[name]
-    end
-    
-    def by_name
-      @map
-    end
-    
-    def by_key
-      @key_map
-    end
-    
-    def by_segment
-      @segment_map
     end
     
     def to_s

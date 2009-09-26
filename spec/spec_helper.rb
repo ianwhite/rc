@@ -13,3 +13,10 @@ rescue LoadError
 end
 
 require 'spec'
+
+# this is so that we can test for a result acting as true
+module Kernel
+  def truthy?
+    self ? true : false
+  end
+end
