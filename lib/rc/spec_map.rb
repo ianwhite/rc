@@ -62,7 +62,7 @@ module Rc
     end
     
     def to_s
-      @map.map {|k,v| "#{k}:'#{v}'"}.join(", ")
+      "{" + @map.map {|k,v| "#{k} => #{v}"}.join(", ") + "}"
     end
     
     def inspect

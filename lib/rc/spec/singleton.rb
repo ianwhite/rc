@@ -15,7 +15,7 @@ module Rc
       end
       
       def inspect
-        "#<#{self.class.name}: name: '#{name}', #{"as: #{as}, " if as} #{to_s}>"
+        "#<#{self.class.name}: #{to_s} {name:#{name}#{",as:#{as}" if as}}>"
       end
       
       def singleton?
