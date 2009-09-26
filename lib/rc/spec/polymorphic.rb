@@ -17,14 +17,12 @@ module Rc
         true
       end
       
-      def expand(segments, map = nil)
-        Spec.from_segments!([segments.first], singleton?, map).tap do |spec|
-          spec.as = as if as
-        end
+      def expand(path, map = nil)
+        Spec.from_path!(path.dup, map, :singleton => singleton?, :as => as)
       end
       
       def to_s
-        "/?#{"/:?_id" unless singleton?}"
+        "/[^/]+#{"/[^/]+" unless singleton?}"
       end
       
       def inspect

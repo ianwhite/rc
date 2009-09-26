@@ -1,30 +1,31 @@
 module Rc
-  # Bag of specs, which can be accessed by name or segment.
+  # Bag of specs, accessed by segment
   class SpecMap
     include Enumerable
     
     # create a spec map containing keyed resources corresponding to param keys
     def self.from_params(params)
-      map = new
-      params.keys.each {|k| map << k.to_s[0..-4] if k.to_s[-3..-1] == '_id'}
-      map
+      new.tap do |map|
+        params.keys.each do |k|
+          map << k.to_s[0..-4] if k.to_s[-3..-1] == '_id'
+        end
+      end
     end
     
     def initialize(*args)
-      @map, @segment_map = {}, {}
+      self.map = {}
       args.each {|a| self << a}
     end
     
     def <<(spec)
       spec = Spec.to_spec(spec)
       raise ArgumentError, "spec must not be incomplete" if spec.incomplete?
-      @segment_map.delete(@map[spec.name].segment) if @map[spec.name]
-      @segment_map[spec.segment] = spec
-      @map[spec.name] = spec
+      map[spec.segment] = spec
+      self
     end
     
     def concat(specs)
-      specs.to_a.each {|s| self << s }
+      specs.is_a?(SpecMap) ? map.merge!(specs.map) : specs.to_a.each {|s| self << s}
       self
     end
     
@@ -35,43 +36,45 @@ module Rc
     # return a new spec map with specs corresponding to the passed params
     # existing specs take priority over the params
     def with_params(params)
-      SpecMap.from_params(params) + self
+      SpecMap.from_params(params).concat(self)
     end
     
     def ==(other)
-      self.class == other.class && to_a == other.to_a
+      self.class == other.class && map == other.map
     end
     
     def to_a
-      @map.values
+      map.values
     end
     
     def each(&block)
-      @map.values.each(&block)
+      to_a.each(&block)
     end
     
-    def [](name)
-      @map[name.to_s]
+    def [](segment, singleton = nil)
+      if spec = map[segment.to_s]
+        singleton.nil? ? spec : (spec.singleton? == singleton && spec)
+      end
     end
         
-    # return spec matching segment.  If singelton supplied, make sure it matches that boolean
-    def for_segment(segment, singleton = nil)
-      spec = @segment_map[segment.to_s]
-      singleton.nil? ? spec : (spec.singleton? == singleton && spec)
+    # return spec matching name
+    def named(name)
+      to_a.find {|s| s.name == name.to_s}
     end
     
     def to_s
-      "{" + @map.map {|k,v| "#{k} => #{v}"}.join(", ") + "}"
+      "{#{to_a.join(", ")}}"
     end
     
     def inspect
-      "#<#{self.class.name}: #{to_s}>"
+      "#<#{self.class.name}: #{to_a.inspect}>"
     end
   
   protected
+    attr_accessor :map
+    
     def initialize_copy(other)
-      other.instance_variable_set('@map', @map.dup)
-      other.instance_variable_set('@segment_map', @segment_map.dup)
+      other.map = map.dup
       super
     end
   end

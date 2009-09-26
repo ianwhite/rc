@@ -146,7 +146,7 @@ describe "Rc::PathSpec" do
         end
         
         it "should expand '/foos/1/bars/2', map to PathSpec.new(:foo, <the mapped spec>)" do
-          @pathspec.expand!('/foos/1/bars/2', @map).should == Rc::PathSpec.new(:foo, @map[:baz])
+          @pathspec.expand!('/foos/1/bars/2', @map).should == Rc::PathSpec.new(:foo, @map.named(:baz))
         end
       end
     end

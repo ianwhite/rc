@@ -62,30 +62,24 @@ module Rc
     
     # return true if the path matches the spec
     def match?(path)
-      return false if incomplete?
-      segments = path_to_segments(path)
-      specs.each {|spec| spec.match!(segments)}
-      segments.empty?
-    rescue Spec::MismatchError
-      false
+      path =~ to_regexp
     end
     
     # Expand an incomplete pathspec, given a path, and optional spec map.
     # Returns a completed path, or raises Spec::MismatchError
     def expand!(path, map = nil)
       return self unless incomplete?
-      segments = path_to_segments(path)
-      expanded = PathSpec.new
+      expanded, path = PathSpec.new, path.dup
       specs.each_with_index do |spec, idx|
         if spec.glob?
-          glob_specs = spec.expand(segments, map, specs[idx+1..-1])
-          glob_specs.each {|spec| expanded << spec.match!(segments)}
+          glob_specs = spec.expand(path, map, specs[idx+1..-1])
+          glob_specs.each {|spec| expanded << spec.match!(path)}
         else
-          spec = spec.expand(segments, map) if spec.incomplete?
-          expanded << spec.match!(segments)
+          spec = spec.expand(path, map) if spec.incomplete?
+          expanded << spec.match!(path)
         end
       end
-      segments.empty? or raise Spec::MismatchError, "left over segments #{segments}"
+      path.empty? or raise Spec::MismatchError, "left over path #{path}"
       expanded
     end
     
@@ -112,16 +106,16 @@ module Rc
       specs.join
     end
     
+    def to_regexp
+      %r(^#{to_s}$)
+    end
+    
     def inspect
-      "#<#{self.class.name}: #{to_s}>"
+      "#<#{self.class.name}: #{specs.inspect}>"
     end
 
   protected
     attr_accessor :specs
-    
-    def path_to_segments(path)
-      path[1..-1].split('/')
-    end
     
     def initialize_copy(other)
       other.specs = specs.dup

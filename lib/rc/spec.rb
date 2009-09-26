@@ -33,29 +33,40 @@ module Rc
         end
       end
       
-      # creates a single spec from the head of a segments array, and consumes the segment(s).
-      # If singleton is not set, autodetect based on next segment
-      # If a map is passed, then use any specs that match
-      def from_segments!(segments, singleton = nil, map = nil)
-        segment = segments.shift
+      # creates a single spec from the head of a path, and consumes the segment(s).
+      # If a map is passed, the any mapped spec matching the head of the path is returned
+      #
+      # Options may be passed that constrain the creation of the spec, for example :singleton
+      def from_path!(path, *args)
+        options = args.extract_options!
+        map = args.first
+        _, segment, key = path.match(%r(^/([^/]+)(?:/([^/]+))?)).to_a
+        segment.blank? and raise MismatchError, "could not find a segment in '#{path}'"
         
         # use mapped spec if it can be found
-        spec = map ? map.for_segment(segment, singleton) : nil
+        spec = map ? map[segment, options[:singleton]] : nil
         
-        # otherwise create a spec using the segment
+        # otherwise create a spec using the segment and passed options
         unless spec
-          singleton.nil? && singleton = (segments[0] !~ /^\d/)
-          segment = segment.singularize unless singleton
-          spec = new segment, :singleton => singleton
+          options[:singleton].nil? && options[:singleton] = (key !~ /^\d/)
+          name = options[:singleton] ? segment : segment.singularize
+          spec = new(name, options.reverse_merge(:segment => segment))
         end
         
-        segments.shift unless spec.singleton? # swallow key segment if not singleton
-        spec
+        spec.match!(path)
       end
+    end
+    
+    def to_s
+      raise "implement to_s to return a Regexp string that would match this segment"
     end
     
     def inspect
       "#<#{self.class.name}: #{to_s}>"
+    end
+    
+    def to_regexp
+      %r(^#{to_s})
     end
     
     def ==(other)
@@ -70,9 +81,15 @@ module Rc
       false
     end
     
-    # consumes matching segments and returns self, raises MismatchError on a false result
-    def match!(segments)
-      raise "match!(segments) must be implemented in sublcass"
+    # consume the first segment(s) of given path, and returns self if it matches this spec
+    # raise MismatchError if no match.
+    def match!(path)
+      if path =~ to_regexp
+        path.sub!(to_regexp,'')
+        self
+      else
+        raise MismatchError, "'#{path}' doesn't match #{self.inspect}"
+      end
     end
     
   protected

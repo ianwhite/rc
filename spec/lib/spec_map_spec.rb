@@ -22,22 +22,22 @@ describe "Rc::SpecMap" do
       @map = Rc::SpecMap.new(:foo)
     end
     
-    it "should allow access by ['foo']" do
-      @map["foo"].should == Rc::Spec.new(:foo)
+    it "should allow access by ['foos']" do
+      @map["foos"].should == Rc::Spec.new(:foo)
     end
     
-    it "should default access by [:foo]" do
-      @map[:foo].should == Rc::Spec.new(:foo)
+    it "should allow access by [:foos]" do
+      @map[:foos].should == Rc::Spec.new(:foo)
     end
     
-    describe "#for_segment" do
-      it "returns spec matching segment when second argument not specified" do
-        @map.for_segment(:foos).should == Rc::Spec.new(:foo)
-      end
-      
-      it "when 2nd arg given, only returns spec if 2nd argument matches singleton?" do
-        @map.for_segment(:foos, true).should_not be_truthy
-        @map.for_segment(:foos, false).should == Rc::Spec.new(:foo)
+    it "when 2nd argument given to [], matches this against singleton" do
+      @map[:foos, true].should_not be_truthy
+      @map[:foos, false].should == Rc::Spec.new(:foo)
+    end
+    
+    describe "#named" do
+      it "returns spec matching name" do
+        @map.named(:foo).should == Rc::Spec.new(:foo)
       end
     end
   
@@ -47,23 +47,23 @@ describe "Rc::SpecMap" do
         @map << @spec
       end
       
-      it "should replace the old spec in all maps" do
-        @map[:foo].should == @spec
-        @map.for_segment(:foos).should_not be_truthy
-        @map.for_segment(:bars).should == @spec
+      it "should add the new spec" do
+        @map[:bars].should == @spec
       end
       
       describe "#with_params({:foo_id => 2, :bar_id => 3})" do
         before do
+          @foo_spec = @map[:foos]
+          @bar_spec = @map[:bars]
           @map = @map.with_params(:foo_id => 2, :bar_id => 3)
         end
         
-        it "should not replace the :foo spec" do
-          @map[:foo].should == @spec
+        it "should not replace the :foos spec" do
+          @map[:foos].should == @foo_spec
         end
         
-        it "should have a :bar spec" do
-          @map[:bar].should == Rc::Spec.to_spec(:bar)
+        it "should not replace the :bars spec" do
+          @map[:bars].should == @bar_spec
         end
       end
     end

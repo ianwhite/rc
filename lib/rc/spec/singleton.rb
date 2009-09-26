@@ -1,7 +1,7 @@
 module Rc
   class Spec
     class Singleton < Spec
-      attr_accessor :name, :segment, :as
+      attr_reader :name, :segment, :as
 
       def initialize(name, options = {}, &block)
         raise ArgumentError, "requires a name" unless name.present?
@@ -20,17 +20,6 @@ module Rc
       
       def singleton?
         true
-      end
-      
-      # consume the first element of given segments, and returns self if it matches this spec
-      # raise MismatchError if no match.
-      def match!(segments)
-        if segment == segments.first
-          segments.shift
-          self
-        else
-          raise MismatchError, "#{segments.first} in '#{segments.join('/')}' doesn't match #{self.inspect}"
-        end
       end
       
       def segment

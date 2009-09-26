@@ -13,16 +13,15 @@ module Rc
       end
       
       def to_s
-        "/*"
+        "(/[^/]+)*"
       end
       
       # given segments, an optional map, and optional remaining specs, returns an array of complete specs
-      def expand(segments, map = nil, remaining_specs = nil)
-        segments = unmatching_segments(segments, remaining_specs) if remaining_specs
-        
+      def expand(path, map = nil, remaining_specs = nil)
+        path = unmatched_path(path, remaining_specs) if remaining_specs
         expanded = []
-        while segments.any? do
-          expanded << Spec.from_segments!(segments, nil, map)
+        while path.any? do
+          expanded << Spec.from_path!(path, map)
         end
         expanded
       end
@@ -33,24 +32,26 @@ module Rc
       end
       
     private
-      # given segments and specs, return the segments up to the point where the specs start to match
-      def unmatching_segments(segments, specs)
+      # given path and specs, return the path up to the point where the specs start to match
+      def unmatched_path(path, specs)
+        segments = path[1..-1].split('/')
+        
         if complete_spec = specs.find {|s| !s.incomplete?}
           complete_idx = specs.index(complete_spec)
           
-          unless unmatching_length = segments.index(complete_spec.segment)
+          unless unmatched_length = segments.index(complete_spec.segment)
             raise MismatchError, "Could not find #{complete_spec} after #{self} in '#{segments.join('/')}'"
           end
           incomplete_specs = complete_idx > 0 ? specs[0..complete_idx-1] : []
         else
-          unmatching_length = segments.length
+          unmatched_length = segments.length
           incomplete_specs = specs
         end
         
         # reverse back for any incomple specs
-        incomplete_specs.each {|s| unmatching_length -= s.singleton? ? 1 : 2 }
+        incomplete_specs.each {|s| unmatched_length -= s.singleton? ? 1 : 2 }
         
-        unmatching_length > 0 ? segments[0..unmatching_length-1] : []
+        unmatched_length > 0 ? "/" + segments[0..unmatched_length-1].join('/') : ''
       end
     end
   end

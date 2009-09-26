@@ -5,16 +5,6 @@ module Rc
         false
       end
       
-      def match!(segments)
-        if segment == segments[0] && segments[1]
-          segments.shift
-          segments.shift
-          self
-        else
-          raise MismatchError, "#{segments.first}/#{segments.second} in '#{segments.join('/')}' doesn't match #{self.inspect}"
-        end
-      end
-      
       def segment
         @segment ||= name.pluralize
       end
@@ -24,9 +14,12 @@ module Rc
       end
     
       def to_s
-        "/#{segment}/:#{key}"
+        "/#{segment}/[^/]+"
       end
-    
+      
+      def inspect
+        "#<#{self.class.name}: #{to_s} {name:#{name},key:#{key}#{",as:#{as}" if as}}>"
+      end
     
     protected
       def equality_attrs
