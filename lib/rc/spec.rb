@@ -1,5 +1,6 @@
 module Rc
-  # This class holds the info that is required to identify a resource based on path segments
+  # This class holds the info that is required to identify a resource based on path segments.
+  # Instantiated by sublcasses
   class Spec
     class MismatchError < RuntimeError; end
     
@@ -48,8 +49,7 @@ module Rc
           spec = new segment, :singleton => singleton
         end
         
-        segments.shift unless spec.singleton? # swallow key segment
-        
+        segments.shift unless spec.singleton? # swallow key segment if not singleton
         spec
       end
     end
@@ -62,12 +62,8 @@ module Rc
       self.class == other.class && self.equality_attrs == other.equality_attrs
     end
     
-    def complete?
-      true
-    end
-    
     def incomplete?
-      !complete?
+      false
     end
     
     def glob?
@@ -82,7 +78,7 @@ module Rc
   protected
     # return an ordered array of attribuets meaningful for equality
     def equality_attrs
-      raise "implement me to enable equality checks"
+      raise "implement equality_attrs to enable equality checks for specs"
     end
   end
 end

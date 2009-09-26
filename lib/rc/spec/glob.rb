@@ -8,8 +8,8 @@ module Rc
         true
       end
       
-      def complete?
-        false
+      def incomplete?
+        true
       end
       
       def to_s
@@ -20,7 +20,7 @@ module Rc
       def expand(segments, map = nil, remaining_specs = nil)
         
         if remaining_specs
-          if next_complete_spec = remaining_specs.find(&:complete?)
+          if next_complete_spec = remaining_specs.find {|s| !s.incomplete?}
             # find segment to glob to
             unless glob_to = segments.index(next_complete_spec.segment)
               raise MismatchError, "Could not find #{next_complete_spec} after #{self} in '#{segments.join('/')}'"
