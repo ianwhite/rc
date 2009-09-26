@@ -32,6 +32,12 @@ module Rc
       dup.concat(specs)
     end
     
+    # return a new spec map with specs corresponding to the passed params
+    # existing specs take priority over the params
+    def with_params(params)
+      SpecMap.from_params(params) + self
+    end
+    
     def to_a
       @map.values
     end
@@ -40,14 +46,14 @@ module Rc
       @map.values.each(&block)
     end
     
+    def [](name)
+      @map[name.to_s]
+    end
+        
     # return spec matching segment.  If singelton supplied, make sure it matches that boolean
     def for_segment(segment, singleton = nil)
       spec = @segment_map[segment.to_s]
       singleton.nil? ? spec : (spec.singleton? == singleton && spec)
-    end
-    
-    def [](name)
-      @map[name.to_s]
     end
     
     def to_s

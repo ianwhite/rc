@@ -52,6 +52,20 @@ describe "Rc::SpecMap" do
         @map.for_segment(:foos).should_not be_truthy
         @map.for_segment(:bars).should == @spec
       end
+      
+      describe "#with_params({:foo_id => 2, :bar_id => 3})" do
+        before do
+          @map = @map.with_params(:foo_id => 2, :bar_id => 3)
+        end
+        
+        it "should not replace the :foo spec" do
+          @map[:foo].should == @spec
+        end
+        
+        it "should have a :bar spec" do
+          @map[:bar].should == Rc::Spec.to_spec(:bar)
+        end
+      end
     end
   end
   
