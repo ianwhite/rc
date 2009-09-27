@@ -4,7 +4,6 @@ module Rc
       attr_reader :as
       
       def initialize(as = nil, options = {}, &block)
-        options.assert_valid_keys(:singleton, :find)
         @as = as.to_s if as.present?
         @singleton = options[:singleton] ? true : false
       end
