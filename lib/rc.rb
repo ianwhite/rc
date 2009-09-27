@@ -1,4 +1,3 @@
-require 'rc/spec'
 require 'rc/spec/singleton'
 require 'rc/spec/keyed'
 require 'rc/spec/glob'

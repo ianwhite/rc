@@ -132,8 +132,8 @@ describe "Rc::Spec" do
       @spec.should be_kind_of(Rc::Spec::Polymorphic)
     end
     
-    it "should have as: 'foo'" do
-      @spec.as.should == 'foo'
+    it "should have name: 'foo'" do
+      @spec.name.should == 'foo'
     end
     
     it "should == Rc::Spec::Polymorphic.new('foo')" do
@@ -150,8 +150,8 @@ describe "Rc::Spec" do
       @spec.should be_kind_of(Rc::Spec::Polymorphic)
     end
     
-    it "should have as: 'foo'" do
-      @spec.as.should == 'foo'
+    it "should have name: 'foo'" do
+      @spec.name.should == 'foo'
     end
     
     it "should be singleton" do

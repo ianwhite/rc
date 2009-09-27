@@ -1,41 +1,36 @@
 module Rc
-  class Spec
-    class Polymorphic < Spec
-      attr_reader :as
-      
-      def initialize(as = nil, options = {}, &block)
-        @as = as.to_s if as.present?
-        @singleton = options[:singleton] ? true : false
-      end
-      
-      def singleton?
-        @singleton
-      end
-      
-      def complete?
-        false
-      end
-      
-      def expand(path, map = nil)
-        Spec.from_path!(path.dup, map, :singleton => singleton?, :as => as)
-      end
-      
-      def to_s
-        "/?#{"/:?_id" unless singleton?}"
-      end
-      
-      def regexp
-        "/[^/]+#{"/[^/]+" unless singleton?}"
-      end
-      
-      def inspect
-        "#<#{self.class.name}: #{to_s}#{" {as:#{as}}" if as}>"
-      end
+  class Spec::Polymorphic < Spec::Incomplete
+    def singleton?
+      @singleton
+    end
     
-    protected
-      def equality_attr_names
-        super + [:singleton?, :as]
-      end
+    def glob?
+      false
+    end
+    
+    def expand(path, map = nil)
+      Spec.from_path!(path.dup, map, :singleton => singleton?, :as => name)
+    end
+    
+    def to_s
+      "/?#{"/:?_id" unless singleton?}"
+    end
+    
+    def regexp
+      "/[^/]+#{"/[^/]+" unless singleton?}"
+    end
+    
+    def inspect
+      "#<#{self.class.name}: #{to_s}#{" {as:#{name}}" if name}>"
+    end
+  
+  protected
+    def initialize_attrs(options)
+      @singleton = options[:singleton] ? true : false
+    end
+    
+    def equality_attr_names
+      super + [:singleton?]
     end
   end
 end

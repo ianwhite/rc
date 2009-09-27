@@ -56,8 +56,10 @@ module Rc
     end
     
     # loads resources using path, params, and map
+    # returns an Rc::Path
     def load(path, params = nil, map = nil)
-      
+      expanded = expand!(path, map.with_params(params))
+      Path.new(expanded, params)
     end
     
     # return true if the path matches the spec
@@ -71,7 +73,7 @@ module Rc
       return self if complete?
       expanded, path = PathSpec.new, path.dup
       specs.each_with_index do |spec, idx|
-        if spec.glob?
+        if !spec.complete? && spec.glob?
           glob_specs = spec.expand(path, map, specs[idx+1..-1])
           glob_specs.each {|spec| expanded << spec.match!(path)}
         else
@@ -93,10 +95,10 @@ module Rc
     # A pathspec is determinate if it can be expanded given a path.
     # This means that only one glob may exist between complete specs.
     def determinate_with?(new_spec)
-      if new_spec.glob?
+      if !new_spec.complete? && new_spec.glob?
         specs.reverse.each do |spec|
-          return false if spec.glob?
           return true if spec.complete?
+          return false if spec.glob?
         end
       end
       true

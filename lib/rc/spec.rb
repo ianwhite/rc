@@ -57,6 +57,13 @@ module Rc
       end
     end
     
+    attr_reader :name
+    
+    def initialize(name, options = {}, &block)
+      @name = name.to_s unless name.blank?
+      initialize_attrs(options, &block)
+    end
+    
     def inspect
       "#<#{self.class.name}: #{to_s}>"
     end
@@ -68,14 +75,6 @@ module Rc
     def ==(other)
       equality_attrs == other.equality_attrs
     rescue NoMethodError
-      false
-    end
-    
-    def complete?
-      true
-    end
-    
-    def glob?
       false
     end
     
@@ -91,9 +90,12 @@ module Rc
     end
     
   protected
+    def initialize_attrs(*args)
+    end
+    
     # return an ordered array of attr names, the values of which are meaningful for equality
     def equality_attr_names
-      [:complete?]
+      [:name]
     end
       
     def equality_attrs
