@@ -5,11 +5,9 @@ module Rc
     
     # create a spec map containing keyed resources corresponding to param keys
     def self.from_params(params)
-      new.tap do |map|
-        params.keys.each do |k|
-          map << k.to_s[0..-4] if k.to_s[-3..-1] == '_id'
-        end
-      end
+      map = new
+      Rc.key_params(params).keys {|k| map << k[0..-4]}
+      map
     end
     
     def initialize(*args)

@@ -15,13 +15,12 @@ module Rc
           @klass ||= class_name.constantize
         end
         
-        def load(params = nil, parent = nil)
-          parent ? parent.send(:source) : klass.first
+        def orm_load(params = nil, parent = nil)
+          parent ? parent.send(source) : klass.first
         end
 
       protected
         def initialize_attrs(options)
-          super(options)
           @source = options[:source] if options[:source]
           @class_name = options[:class_name] if options[:class_name]
         end
@@ -36,8 +35,8 @@ module Rc
           @source ||= name.pluralize
         end
         
-        def load(params, parent = nil)
-          parent ? parent.send(:source).find(params[:key]) ? klass.find(params[:key])
+        def orm_load(params, parent = nil)
+          parent ? parent.send(source).find(params[key]) : klass.find(params[key])
         end
       end
     end

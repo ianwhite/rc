@@ -1,1 +1,1 @@
-require 'rc'
+require 'rc/active_record' if defined?(ActiveRecord)

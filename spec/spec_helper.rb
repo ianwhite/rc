@@ -7,9 +7,8 @@ begin
 rescue LoadError
   require 'rubygems'
   require 'active_support'
-  require 'action_pack'
   $LOAD_PATH << "#{__DIR__}/../lib"
-  require "#{__DIR__}/../init"
+  require "rc"
 end
 
 require 'spec'

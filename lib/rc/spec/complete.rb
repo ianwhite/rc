@@ -2,8 +2,9 @@ require 'rc/spec'
 
 module Rc
   class Spec::Complete < Spec
-    def initialize(name, *args, &block)
+    def initialize(name, options = {}, &block)
       raise ArgumentError, "name is required for a #{self.class.name}" if name.blank?
+      options[:load] ||= block
       super
     end
     
@@ -14,22 +15,30 @@ module Rc
     def complete?
       true
     end
-    
-    #def service(parent = nil)
-    #  @service ||= service_class.new(self)
-    #  @service.parent = parent
-    #  @service
-    #end
-    #
-    #def service_class
-    #  @service_class ||= singleton? ? Rc::Service::Singleton : Rc::Service::Keyed
-    #end
 
+    def load(params = {}, parent = nil, exec = nil)
+      if @load
+        case @load
+        when Symbol, String
+          raise "Execution context required if :load is a symbol or string" unless exec
+          exec.send(@load)
+        when Proc
+          case @load.arity
+          when 0 then exec ? exec.instance_eval(&@load) : @load.call
+          when 1 then exec ? exec.instance_exec(params, &@load) : @load.call(params)
+          else exec ? exec.instance_exec(params, parent, &@load) : @load.call(params, parent)
+          end
+        end
+      else
+        orm_load(params, parent)
+      end
+    end
+      
   protected
     def initialize_attrs(options)
-      super
-      #@service = options[:service] if options[:service]
-      #@service_class = options[:service_class] if options[:service_class]
+      if @load = options[:load]
+        raise ArgumentError, ":load should be either a lambda, or a symbol" unless [Proc, String, Symbol].find{|c| @load.is_a?(c)}
+      end
     end
   end
 end

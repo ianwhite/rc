@@ -61,7 +61,7 @@ module Rc
     
     def initialize(name, options = {}, &block)
       @name = name.to_s unless name.blank?
-      initialize_attrs(options, &block)
+      initialize_attrs(options)
     end
     
     def inspect
@@ -90,7 +90,7 @@ module Rc
     end
     
   protected
-    def initialize_attrs(*args)
+    def initialize_attrs(options)
     end
     
     # return an ordered array of attr names, the values of which are meaningful for equality

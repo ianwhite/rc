@@ -55,11 +55,11 @@ module Rc
       specs.find {|s| !s.complete?} ? false : true
     end
     
-    # loads resources using path, params, and map
+    # loads resources using params, path, and map
     # returns an Rc::Path
-    def load(path, params = nil, map = nil)
-      expanded = expand!(path, map.with_params(params))
-      Path.new(expanded, params)
+    def load(params = {}, exec = nil)
+      raise "Can only load a complete path" unless complete?
+      Path.new(self, params, exec)
     end
     
     # return true if the path matches the spec
