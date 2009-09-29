@@ -16,8 +16,12 @@ module Rc
       Spec.to_spec(arg, opts, &block)
     end
     
+    def spec_map(*args)
+      SpecMap.new(*args)
+    end
+    
     def key_params(params)
-      keys = {}
+      keys = HashWithIndifferentAccess.new
       params.each {|k,v| keys[k.to_s] = v if k.to_s[-3..-1] == '_id'}
       keys
     end

@@ -30,7 +30,7 @@ module Rc
           end
         end
       else
-        orm_load(params, parent)
+        find(params, parent)
       end
     end
       
