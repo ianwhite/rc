@@ -1,7 +1,37 @@
 = rc
 
-Rewrite of resources_controller.
+Rewrite of resources_controller, main aim is to make backend ORM and controller arch pluggable.  Subsidiary aim API improvements.
+There shall be an rc_bc plugin that aims at backwards compat with resources_controller.
 
+= It's work in progress!
+
+== Path
+
+When rc has parsed a path against a path_spec, you get an rc path, with this you can do all of the relative resource stuff you might want to do
+
+e.g.
+
+  Spec: Singleton: "account", Polymorphic: "commentable", Keyed: "comment"
+
+  request.path: '/account/posts/3/comments/2'
+
+  Rc::Path contains the records and the rc path_spec info
+  
+  p.resource    # => <Comment: 2>
+  p.parents     # => [<User:1>, <Post:3>]
+  p.member      # => [:account, <Post: 3>, <Comment: 2>]  # suitable for passing to polymorphic_path
+  p.collection  # => [:account, <Post: 3>, :comments]     # as above
+
+  # go up the path
+  p.up            # => new Rc::Path for immediately enclosing 
+  p.up.resource   # => <Post: 3>
+  p.up.parents    # => 
+  p.up.member     # => [:account, <Post: 3>]
+  p.up.collection # => [:account, :posts]
+  
+  # go to the comment path for another comment in same context
+  p.up.member << @comment # => [:account, <Post: 3>, <Comment: 5>]
+  
 == PathSpec
 
 === Specify a RESTful resource
