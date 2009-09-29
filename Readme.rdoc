@@ -25,7 +25,7 @@ e.g.
   # go up the path
   p.up            # => new Rc::Path for immediately enclosing 
   p.up.resource   # => <Post: 3>
-  p.up.parents    # => 
+  p.up.parents    # => [<User:1>]
   p.up.member     # => [:account, <Post: 3>]
   p.up.collection # => [:account, :posts]
   
